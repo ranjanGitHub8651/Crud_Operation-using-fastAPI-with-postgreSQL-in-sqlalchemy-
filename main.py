@@ -37,8 +37,13 @@ async def insert_user(
 
 
 @app.get("/user/")
-def all_users(db: Session = Depends(get_db)):
-    data =  db.query(User).filter(User.gender == Gender.female).filter(User.role == Role.other).all()
+def all_users( gender: Gender | None = None, role: Role | None = None, db: Session = Depends(get_db),):
+
+    query =  db.query(User)
+    if gender:
+        query = query.filter(User.gender == gender).filter(User.role == role)
+    
+    data = query.all()
     if not data:
         raise HTTPException(status_code=404, detail="User not found. ")
     return data
