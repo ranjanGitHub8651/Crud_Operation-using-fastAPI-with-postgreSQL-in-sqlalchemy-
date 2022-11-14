@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session, Query
 
 from db import SessionLocal, engine
-from models import User, Base, Gender
+from models import User, Base, Gender, Role
 from validators import UserCreateRequest, UserResponse, UserUpdateRequest
 
 Base.metadata.create_all(bind=engine)
@@ -38,7 +38,10 @@ async def insert_user(
 
 @app.get("/user/")
 def all_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
+    data =  db.query(User).filter(User.gender == Gender.female).filter(User.role == Role.other).all()
+    if not data:
+        raise HTTPException(status_code=404, detail="User not found. ")
+    return data
 
 
 @app.get("/user/{user_id}/", response_model=UserResponse)
